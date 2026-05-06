@@ -4,6 +4,7 @@ namespace ArtOfWifi\StatamicIndexnow;
 
 use ArtOfWifi\StatamicIndexnow\Console\Commands\PruneSubmissionsCommand;
 use ArtOfWifi\StatamicIndexnow\Http\Controllers\IndexNowUtilityController;
+use ArtOfWifi\StatamicIndexnow\Listeners\ClearEntriesCache;
 use ArtOfWifi\StatamicIndexnow\Listeners\SubmitOnPublish;
 use Statamic\Events\EntrySaved;
 use Statamic\Facades\Utility;
@@ -15,12 +16,17 @@ class ServiceProvider extends AddonServiceProvider
     protected $listen = [
         EntrySaved::class => [
             SubmitOnPublish::class,
+            ClearEntriesCache::class,
         ],
     ];
 
     /** @var list<class-string> */
     protected $commands = [
         PruneSubmissionsCommand::class,
+    ];
+
+    protected $scripts = [
+        __DIR__.'/../public/build/addon.js',
     ];
 
     public function register(): void
@@ -41,6 +47,8 @@ class ServiceProvider extends AddonServiceProvider
                 ->action([IndexNowUtilityController::class, 'index'])
                 ->routes(function ($router) {
                     $router->post('submit', [IndexNowUtilityController::class, 'submit'])->name('submit');
+                    $router->get('entries', [IndexNowUtilityController::class, 'entries'])->name('entries');
+                    $router->get('select', [IndexNowUtilityController::class, 'select'])->name('select');
                 });
         });
     }
